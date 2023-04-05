@@ -1,23 +1,17 @@
 from tkinter import Tk, filedialog, messagebox
-from yaml import dump, safe_load
 
 
 root = Tk()
 root.withdraw()
 
-messagebox.showinfo(title="Main File Selection", message="Select primary file for other yaml files to be appended to.")
-origin = filedialog.askopenfilename()
+messagebox.showinfo(title="File Selection", message="Select all files that you would like to combine. "
+                                                    "Pressing ctrl while clicking will allow multiple selections.")
+files = filedialog.askopenfilenames(title="File Selection", filetypes=(("yaml files", "*.yaml"),), defaultextension="yaml")
 
-messagebox.showinfo(title="Additional File Selection", message="Select all files that you would like to append to the "
-                                                               "main file. pressing ctrl while clicking will allow "
-                                                               "multiple selections.")
-other_files = filedialog.askopenfilenames(title="Files to add to main file")
+messagebox.showinfo(title="Output Selection", message="Select file to save this as.")
+output = filedialog.asksaveasfilename(confirmoverwrite=True, defaultextension="yaml", title="Output File", filetypes=(("yaml files", "*.yaml"),))
 
-with open(origin, 'a') as main_data:
-    for filename in other_files:
-        main_data.write('\n---\n\n')
-        with open(filename) as w:
-            other_data = safe_load(w)
-            dump(other_data, main_data)
+with open(output, 'wt') as main_data:
+    main_data.write('\n---\n\n'.join(open(file, 'rt').read() for file in files))
 
-messagebox.showinfo(title="Complete", message=f"Process complete. All yaml files have been compiled into {origin}.")
+messagebox.showinfo(title="Complete", message=f"Process complete. All yaml files have been compiled into {output}.")
